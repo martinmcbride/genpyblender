@@ -176,11 +176,8 @@ class Axes():
 
 class BasePlot:
 
-    def __init__(self, axes, function, colormap, precision=20):
+    def __init__(self, axes):
         self.axes = axes
-        self.function = function
-        self.colormap = colormap
-        self.precision = precision
 
     def crop_plot(self, plot_obj):
         bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 0))
@@ -196,7 +193,7 @@ class BasePlot:
         plot_obj.modifiers[0].operation = 'INTERSECT'
         bpy.ops.object.modifier_apply(modifier=plot_obj.modifiers[0].name)
 
-    def apply_colormap(self):
+    def apply_colormap(self, colormap):
         bpy.ops.object.mode_set(mode='OBJECT')
 
         # Get the active object (which is the cube)
@@ -220,7 +217,7 @@ class BasePlot:
                 vert = mesh.vertices[vertex_index]
                 # vert.co.z is the z-value of the graph element in blender coords, ie in the range -1 to +1.
                 # The colormap has input range 0 to 1. This code maps between the two.
-                color = self.colormap((vert.co.z + 1) / 2)
+                color = colormap((vert.co.z + 1) / 2)
                 active_vc_layer.data[loop_index].color = color
 
         # Create a new material
@@ -263,7 +260,10 @@ class BasePlot:
 class Plot3dZofXY(BasePlot):
 
     def __init__(self, axes, function, colormap, precision=20):
-        super().__init__(axes, function, colormap, precision)
+        super().__init__(axes)
+        self.function = function
+        self.colormap = colormap
+        self.precision = precision
         self.show_lines = True
         self.line_color = (0, 0, 0.5, 0)
         self.line_radius = 0.01
@@ -317,7 +317,7 @@ class Plot3dZofXY(BasePlot):
 
         bmesh.update_edit_mesh(mesh)
 
-        self.apply_colormap()
+        self.apply_colormap(self.colormap)
 
         if self.show_lines:
             self.draw_lines()
