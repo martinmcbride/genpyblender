@@ -1,0 +1,1 @@
+blender --background -noaudio --python basic_3d_plot.py --render-frame 1
