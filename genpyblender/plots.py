@@ -174,17 +174,13 @@ class Axes():
         self.draw_axes()
 
 
-class Plot3dZofXY:
+class BasePlot:
 
     def __init__(self, axes, function, colormap, precision=20):
         self.axes = axes
         self.function = function
         self.colormap = colormap
         self.precision = precision
-        self.show_lines = False
-        self.line_color = (0, 0, 0.5, 0)
-        self.line_radius = 0.01
-
 
     def crop_plot(self, plot_obj):
         bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 0))
@@ -200,54 +196,7 @@ class Plot3dZofXY:
         plot_obj.modifiers[0].operation = 'INTERSECT'
         bpy.ops.object.modifier_apply(modifier=plot_obj.modifiers[0].name)
 
-    def draw_lines(self):
-        for x in self.axes.div_positions[0]:
-            for i in range(self.precision):
-                y0 = 2*i/self.precision -1
-                y1 = 2*(i+1)/self.precision -1
-
-                xg, y0g, _ = self.axes.convert_points_blender_to_graph(x, y0, 0)
-                z0g = self.function(xg, y0g)
-                x, y0, z0 = self.axes.convert_points_graph_to_blender(xg, y0g, z0g)
-
-                xg, y1g, _ = self.axes.convert_points_blender_to_graph(x, y1, 0)
-                z1g = self.function(xg, y1g)
-                x, y1, z1 = self.axes.convert_points_graph_to_blender(xg, y1g, z1g)
-
-                self.axes.cylinder_between(x, y0, z0, x, y1, z1, self.line_radius, self.line_color)
-
-        for y in self.axes.div_positions[1]:
-            for i in range(self.precision):
-                x0 = 2 * i / self.precision - 1
-                x1 = 2 * (i + 1) / self.precision - 1
-    
-                x0g, yg, _ = self.axes.convert_points_blender_to_graph(x0, y, 0)
-                z0g = self.function(x0g, yg)
-                x0, y, z0 = self.axes.convert_points_graph_to_blender(x0g, yg, z0g)
-    
-                x1g, yg, _ = self.axes.convert_points_blender_to_graph(x1, y, 0)
-                z1g = self.function(x1g, yg)
-                x1, y, z1 = self.axes.convert_points_graph_to_blender(x1g, yg, z1g)
-    
-                self.axes.cylinder_between(x0, y, z0, x1, y, z1, self.line_radius, self.line_color)
-
-    def plot(self):
-        bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.precision, y_subdivisions=self.precision, location=(0, 0, 0))
-
-        bpy.ops.object.mode_set(mode='EDIT')
-
-        obj = bpy.context.active_object
-        mesh = obj.data
-
-        bm = bmesh.from_edit_mesh(mesh)
-
-        for v in bm.verts:
-            x, y, _ = self.axes.convert_points_blender_to_graph(v.co.x, v.co.y, 0)
-            z = self.function(x, y)
-            v.co.z += self.axes.convert_points_graph_to_blender(x, y, z)[2]
-
-        bmesh.update_edit_mesh(mesh)
-
+    def apply_colormap(self):
         bpy.ops.object.mode_set(mode='OBJECT')
 
         # Get the active object (which is the cube)
@@ -271,7 +220,7 @@ class Plot3dZofXY:
                 vert = mesh.vertices[vertex_index]
                 # vert.co.z is the z-value of the graph element in blender coords, ie in the range -1 to +1.
                 # The colormap has input range 0 to 1. This code maps between the two.
-                color = self.colormap((vert.co.z + 1)/2)
+                color = self.colormap((vert.co.z + 1) / 2)
                 active_vc_layer.data[loop_index].color = color
 
         # Create a new material
@@ -308,6 +257,69 @@ class Plot3dZofXY:
 
         bpy.ops.object.mode_set(mode='OBJECT')
 
-        self.draw_lines()
+    def plot(self):
+        pass
+
+class Plot3dZofXY(BasePlot):
+
+    def __init__(self, axes, function, colormap, precision=20):
+        super().__init__(axes, function, colormap, precision)
+        self.show_lines = True
+        self.line_color = (0, 0, 0.5, 0)
+        self.line_radius = 0.01
+
+    def draw_lines(self):
+        for x in self.axes.div_positions[0]:
+            for i in range(self.precision):
+                y0 = 2 * i / self.precision - 1
+                y1 = 2 * (i + 1) / self.precision - 1
+
+                xg, y0g, _ = self.axes.convert_points_blender_to_graph(x, y0, 0)
+                z0g = self.function(xg, y0g)
+                x, y0, z0 = self.axes.convert_points_graph_to_blender(xg, y0g, z0g)
+
+                xg, y1g, _ = self.axes.convert_points_blender_to_graph(x, y1, 0)
+                z1g = self.function(xg, y1g)
+                x, y1, z1 = self.axes.convert_points_graph_to_blender(xg, y1g, z1g)
+
+                self.axes.cylinder_between(x, y0, z0, x, y1, z1, self.line_radius, self.line_color)
+
+        for y in self.axes.div_positions[1]:
+            for i in range(self.precision):
+                x0 = 2 * i / self.precision - 1
+                x1 = 2 * (i + 1) / self.precision - 1
+
+                x0g, yg, _ = self.axes.convert_points_blender_to_graph(x0, y, 0)
+                z0g = self.function(x0g, yg)
+                x0, y, z0 = self.axes.convert_points_graph_to_blender(x0g, yg, z0g)
+
+                x1g, yg, _ = self.axes.convert_points_blender_to_graph(x1, y, 0)
+                z1g = self.function(x1g, yg)
+                x1, y, z1 = self.axes.convert_points_graph_to_blender(x1g, yg, z1g)
+
+                self.axes.cylinder_between(x0, y, z0, x1, y, z1, self.line_radius, self.line_color)
+
+    def plot(self):
+        bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.precision, y_subdivisions=self.precision,
+                                        location=(0, 0, 0))
+
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        obj = bpy.context.active_object
+        mesh = obj.data
+
+        bm = bmesh.from_edit_mesh(mesh)
+
+        for v in bm.verts:
+            x, y, _ = self.axes.convert_points_blender_to_graph(v.co.x, v.co.y, 0)
+            z = self.function(x, y)
+            v.co.z += self.axes.convert_points_graph_to_blender(x, y, z)[2]
+
+        bmesh.update_edit_mesh(mesh)
+
+        self.apply_colormap()
+
+        if self.show_lines:
+            self.draw_lines()
 
         self.crop_plot(obj)
