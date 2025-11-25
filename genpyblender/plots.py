@@ -39,11 +39,60 @@ class Axes():
         self.extent = (1, 1, 1)
         self.divisions = (0.2, 0.2, 0.2)
 
+        self.x_div_formatter = None
+        self.y_div_formatter = None
+        self.z_div_formatter = None
+
         self.font_size = 0.15
         self.text_offset_x = (0, -0.25, -0.05)
         self.text_offset_y = (0.05, -0.05, -0.05)
         self.text_offset_z = (0.05, 0, -0.05)
         self.steps = None
+
+    def of_start(self, start):
+        '''
+        Sets the start value of the axes
+
+        Args:
+            start: (x, y, z) value of bottom left corner of axes
+
+        Returns:
+            self
+        '''
+        self.start = start
+        return self
+
+    def of_extent(self, extent):
+        '''
+        Sets the range of the axes
+
+        Args:
+            extent: (x, y, z) range of axes
+
+        Returns:
+            self
+        '''
+        self.extent = extent
+        return self
+
+    def with_divisions(self, divisions):
+        '''
+        Set divisions spacing
+
+        Args:
+            divisions: (x, y, z) spacing divisions in each direction
+
+        Returns:
+            self
+        '''
+        self.divisions = divisions
+        return self
+
+    def with_division_formatters(self, x_div_formatter=None, y_div_formatter=None, z_div_formatter=None):
+        self.x_div_formatter = x_div_formatter
+        self.y_div_formatter = y_div_formatter
+        self.z_div_formatter = z_div_formatter
+        return self
 
     def convert_points_graph_to_blender(self, x, y, z):
         end = tuple([e + s for s, e in zip(self.start, self.extent)])
@@ -84,7 +133,6 @@ class Axes():
         print("STEPS", self.steps)
 
     def add_axis_text(self, value, location):
-#        print("ADD", value, location)
         bpy.ops.object.text_add(enter_editmode=False, align='WORLD')
         obj = bpy.context.active_object
         obj.location = location

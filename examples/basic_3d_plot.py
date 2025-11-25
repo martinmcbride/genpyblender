@@ -15,10 +15,7 @@ def draw(pixel_width, pixel_height, frame_no, frame_count):
 
     camera_object = camera.create_plot_camera()
 
-    axes = plots.Axes()
-    axes.extent = (2, 2, 2)
-    axes.divisions = (.4,)*3
-    axes.start = (-1, -1, 0)
+    axes = plots.Axes().of_start((-1, -1, 0)).of_extent((2, 2, 2)).with_divisions((0.5, 0.5, 0.5))
     axes.draw()
     plot = plots.Plot3dZofXY(axes, lambda x, y :2 - (x*x +y*y), colormap.ViridianMap(0, 1))
     plot.plot()
