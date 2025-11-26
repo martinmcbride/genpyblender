@@ -236,6 +236,20 @@ class BasePlot:
 
     def __init__(self, axes):
         self.axes = axes
+        self.colormap = None
+        self.precision = 20
+        self.show_lines = True
+        self.line_color = (0, 0, 0.5, 0)
+        self.line_radius = 0.01
+
+    def fill(self, colormap):
+        self.colormap = colormap
+        return self
+
+    def stroke(self, color, line_width=0.01):
+        self.line_color = color
+        self.line_radius = line_width
+        return self
 
     def crop_plot(self, plot_obj):
         bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 0))
@@ -317,21 +331,16 @@ class BasePlot:
 
 class Plot3dZofXY(BasePlot):
 
-    def __init__(self, axes, function, colormap, precision=20):
+    def __init__(self, axes):
         super().__init__(axes)
-        self.function = function
-        self.colormap = colormap
-        self.precision = precision
-        self.show_lines = True
-        self.line_color = (0, 0, 0.5, 0)
-        self.line_radius = 0.01
+        self.function = lambda x, y: 0
 
     def of_function(self, function, precision=20):
         '''
-        Plot a function y = fn(x)
+        Plot a function z = fn(x, y)
 
         Args:
-            function: the function to plot. It must take a single argument
+            function: the function to plot.
             precision: number of points to plot. Defaults to 20. This can be increased if needed for hi res plots
 
         Returns:
@@ -340,6 +349,7 @@ class Plot3dZofXY(BasePlot):
 
         self.function = function
         self.precision = precision
+        return self
 
     def draw_lines(self):
         for x in self.axes.div_positions[0]:
