@@ -238,7 +238,7 @@ class BasePlot:
         self.axes = axes
         self.colormap = None
         self.precision = 20
-        self.show_lines = True
+        self.show_lines = False
         self.line_color = (0, 0, 0.5, 0)
         self.line_radius = 0.01
 
@@ -249,6 +249,7 @@ class BasePlot:
     def stroke(self, color, line_width=0.01):
         self.line_color = color
         self.line_radius = line_width
+        self.show_lines = True
         return self
 
     def crop_plot(self, plot_obj):
@@ -335,7 +336,7 @@ class Plot3dZofXY(BasePlot):
         super().__init__(axes)
         self.function = lambda x, y: 0
 
-    def of_function(self, function, precision=20):
+    def of_function(self, function, precision=20, extent=()):
         '''
         Plot a function z = fn(x, y)
 
@@ -393,10 +394,101 @@ class Plot3dZofXY(BasePlot):
 
         bm = bmesh.from_edit_mesh(mesh)
 
-        for v in bm.verts:
-            x, y, _ = self.axes.convert_points_blender_to_graph(v.co.x, v.co.y, 0)
+        for verts in bm.verts:
+            x, y, _ = self.axes.convert_points_blender_to_graph(verts.co.x, verts.co.y, 0)
             z = self.function(x, y)
-            v.co.z += self.axes.convert_points_graph_to_blender(x, y, z)[2]
+            verts.co.z = self.axes.convert_points_graph_to_blender(x, y, z)[2]
+
+        bmesh.update_edit_mesh(mesh)
+
+        self.apply_colormap(self.colormap)
+
+        if self.show_lines:
+            self.draw_lines()
+
+        self.crop_plot(obj)
+
+
+class Plot3dXYZofUV(BasePlot):
+
+    def __init__(self, axes):
+        super().__init__(axes)
+        self.function_x = lambda u, v: u
+        self.function_y = lambda u, v: v
+        self.function_y = lambda u, v: 0
+        self.u_extent = (0, 1)
+        self.x_extent = (0, 1)
+
+    def of_function(self, function_x, function_y, function_z, u_extent = (0, 1), v_extent = (0, 1), precision=20):
+        '''
+        Plot a function z = fn(x, y)
+
+        Args:
+            function: the function to plot.
+            precision: number of points to plot. Defaults to 20. This can be increased if needed for hi res plots
+
+        Returns:
+            self
+        '''
+
+        self.function_x = function_x
+        self.function_y = function_y
+        self.function_z = function_z
+        self.precision = precision
+        self.u_extent = u_extent
+        self.v_extent = v_extent
+        return self
+
+    def draw_lines(self):
+        for x in self.axes.div_positions[0]:
+            for i in range(self.precision):
+                y0 = 2 * i / self.precision - 1
+                y1 = 2 * (i + 1) / self.precision - 1
+
+                xg, y0g, _ = self.axes.convert_points_blender_to_graph(x, y0, 0)
+                z0g = self.function_x(xg, y0g)
+                x, y0, z0 = self.axes.convert_points_graph_to_blender(xg, y0g, z0g)
+
+                xg, y1g, _ = self.axes.convert_points_blender_to_graph(x, y1, 0)
+                z1g = self.function_y(xg, y1g)
+                x, y1, z1 = self.axes.convert_points_graph_to_blender(xg, y1g, z1g)
+
+                self.axes.cylinder_between(x, y0, z0, x, y1, z1, self.line_radius, self.line_color)
+
+        for y in self.axes.div_positions[1]:
+            for i in range(self.precision):
+                x0 = 2 * i / self.precision - 1
+                x1 = 2 * (i + 1) / self.precision - 1
+
+                x0g, yg, _ = self.axes.convert_points_blender_to_graph(x0, y, 0)
+                z0g = self.function_x(x0g, yg)
+                x0, y, z0 = self.axes.convert_points_graph_to_blender(x0g, yg, z0g)
+
+                x1g, yg, _ = self.axes.convert_points_blender_to_graph(x1, y, 0)
+                z1g = self.function_y(x1g, yg)
+                x1, y, z1 = self.axes.convert_points_graph_to_blender(x1g, yg, z1g)
+
+                self.axes.cylinder_between(x0, y, z0, x1, y, z1, self.line_radius, self.line_color)
+
+    def plot(self):
+        bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.precision, y_subdivisions=self.precision,
+                                        location=(0, 0, 0))
+
+        bpy.ops.object.mode_set(mode='EDIT')
+
+        obj = bpy.context.active_object
+        mesh = obj.data
+
+        bm = bmesh.from_edit_mesh(mesh)
+
+        for verts in bm.verts:
+            vert_u, vert_v, _ = self.axes.convert_points_blender_to_graph(verts.co.x, verts.co.y, 0)
+            u = self.u_extent[0] + vert_u*(self.u_extent[1] - self.u_extent[0])
+            v = self.v_extent[0] + vert_v*(self.v_extent[1] - self.v_extent[0])
+            x = self.function_x(u, v)
+            y = self.function_y(u, v)
+            z = self.function_z(u, v)
+            verts.co.x, verts.co.y, verts.co.z = self.axes.convert_points_graph_to_blender(x, y, z)
 
         bmesh.update_edit_mesh(mesh)
 
