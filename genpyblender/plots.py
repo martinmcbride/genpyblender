@@ -18,6 +18,9 @@ def create_diffuse_material(mesh, colour, name):
     material.diffuse_color = colour
     mesh.data.materials.append(material)
 
+def default_div_formatter(value):
+    return f"{value: .1f}"
+
 class Axes():
 
     def __init__(self):
@@ -39,9 +42,9 @@ class Axes():
         self.extent = (1, 1, 1)
         self.divisions = (0.2, 0.2, 0.2)
 
-        self.x_div_formatter = None
-        self.y_div_formatter = None
-        self.z_div_formatter = None
+        self.x_div_formatter = default_div_formatter
+        self.y_div_formatter = default_div_formatter
+        self.z_div_formatter = default_div_formatter
 
         self.font_size = 0.15
         self.text_offset_x = (0, -0.25, -0.05)
@@ -130,7 +133,6 @@ class Axes():
         z_positions = tuple([self.convert_points_graph_to_blender(0, 0, v)[2] for v in div_values[2]])
         self.div_positions = (x_positions, y_positions, z_positions)
         self.steps = tuple(div_values)
-        print("STEPS", self.steps)
 
     def add_axis_text(self, value, location):
         bpy.ops.object.text_add(enter_editmode=False, align='WORLD')
@@ -177,7 +179,7 @@ class Axes():
             for p, pa in zip(self.steps[0], self.div_positions[0]):
                 self.cylinder_between(pa, self.axis_end[1], self.axis_start[2], pa, self.axis_end[1], self.axis_end[2], self.div_radius, self.div_color)
                 if pa < 0.9:
-                    self.add_axis_text(f"{p: .1f}", (pa + self.text_offset_x[0], self.axis_start[1] + self.text_offset_x[1], self.axis_start[2] + self.text_offset_x[2]))
+                    self.add_axis_text(self.x_div_formatter(p), (pa + self.text_offset_x[0], self.axis_start[1] + self.text_offset_x[1], self.axis_start[2] + self.text_offset_x[2]))
             for p, pa in zip(self.steps[2], self.div_positions[2]):
                 self.cylinder_between(self.axis_start[0], self.axis_end[1], pa, self.axis_end[0], self.axis_end[1], pa, self.div_radius, self.div_color)
 
@@ -188,7 +190,7 @@ class Axes():
             for p, pa in zip(self.steps[1], self.div_positions[1]):
                 self.cylinder_between(self.axis_start[0], pa, self.axis_start[2], self.axis_start[0], pa, self.axis_end[2], self.div_radius, self.div_color)
                 if pa > -0.9 and pa < 0.9:
-                    self.add_axis_text(f"{p: .1f}", (self.axis_end[0] + self.text_offset_y[0], pa + self.text_offset_y[1], self.axis_start[2] + self.text_offset_y[2]))
+                    self.add_axis_text(self.y_div_formatter(p), (self.axis_end[0] + self.text_offset_y[0], pa + self.text_offset_y[1], self.axis_start[2] + self.text_offset_y[2]))
             for p, pa in zip(self.steps[2], self.div_positions[2]):
                 self.cylinder_between(self.axis_start[0], self.axis_start[1], pa, self.axis_start[0], self.axis_end[1], pa, self.div_radius, self.div_color)
 
@@ -198,7 +200,7 @@ class Axes():
                 self.cylinder_between(pa, self.axis_start[1], self.axis_start[2], pa, self.axis_end[1], self.axis_start[2], self.div_radius, self.div_color)
             for p, pa in zip(self.steps[2], self.div_positions[2]):
                 if pa > -0.9:
-                    self.add_axis_text(f"{p: .1f}", (self.axis_end[0] + self.text_offset_z[0], self.axis_end[1] + self.text_offset_z[1], pa + self.text_offset_z[2]))
+                    self.add_axis_text(self.z_div_formatter(p), (self.axis_end[0] + self.text_offset_z[0], self.axis_end[1] + self.text_offset_z[1], pa + self.text_offset_z[2]))
             for p, pa in zip(self.steps[1], self.div_positions[1]):
                 self.cylinder_between(self.axis_start[0], pa, self.axis_start[2], self.axis_end[0], pa, self.axis_start[2], self.div_radius, self.div_color)
 
@@ -315,6 +317,21 @@ class Plot3dZofXY(BasePlot):
         self.show_lines = True
         self.line_color = (0, 0, 0.5, 0)
         self.line_radius = 0.01
+
+    def of_function(self, function, precision=20):
+        '''
+        Plot a function y = fn(x)
+
+        Args:
+            function: the function to plot. It must take a single argument
+            precision: number of points to plot. Defaults to 20. This can be increased if needed for hi res plots
+
+        Returns:
+            self
+        '''
+
+        self.function = function
+        self.precision = precision
 
     def draw_lines(self):
         for x in self.axes.div_positions[0]:
