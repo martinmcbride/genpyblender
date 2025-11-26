@@ -52,6 +52,11 @@ class Axes():
         self.text_offset_z = (0.05, 0, -0.05)
         self.steps = None
 
+        self.axis_labels = ("X", "Y", "Z")
+        self.axis_offset_x = (1.4, 0, -1.1)
+        self.axis_offset_y = (0, -1.4, -1.1)
+        self.axis_offset_z = (1.4, 1.1, 0)
+
     def of_start(self, start):
         '''
         Sets the start value of the axes
@@ -215,6 +220,9 @@ class Axes():
         self.cylinder_between(-1, 1, -1, 1, 1, -1, r, color=self.xaxis_color)
         self.cylinder_between(-1, -1, -1, -1, 1, -1, r, color=self.yaxis_color)
         self.cylinder_between(-1, 1, -1, -1, 1, 1, r, color=self.zaxis_color)
+        self.add_axis_text(self.axis_labels[0], self.axis_offset_x)
+        self.add_axis_text(self.axis_labels[1], self.axis_offset_y)
+        self.add_axis_text(self.axis_labels[2], self.axis_offset_z)
 
     def draw(self):
         self._set_divisions()
