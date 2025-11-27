@@ -252,6 +252,32 @@ class BasePlot:
         self.show_lines = True
         return self
 
+    def _is_crop_face(self, face_verts):
+        """
+        When a 3D plot is cropped to the axes, extra faces (crop faces) are created where the plot intersect the crop box. Thes faces need
+        to be removed.
+
+        The crop faces are aligned with the crop cube, so all the vertices of a crop face will have one coordinate that is ieqaul to the min
+        of max value of either x, y or z. For example, a crop face corresponding to maximum x will have vertices with x = 1. We test for > 0.999 to
+        avoiud rounding errors.
+
+        :param face_verts:
+        :return:
+        """
+        if all((v.co.x > 0.9999 for v in face_verts)):
+            return True
+        if all((v.co.x < -0.9999 for v in face_verts)):
+            return True
+        if all((v.co.y > 0.9999 for v in face_verts)):
+            return True
+        if all((v.co.y < -0.9999 for v in face_verts)):
+            return True
+        if all((v.co.z > 0.9999 for v in face_verts)):
+            return True
+        if all((v.co.z < -0.9999 for v in face_verts)):
+            return True
+        return False
+
     def crop_plot(self, plot_obj):
         bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 0))
         cube = bpy.context.selected_objects[0]
@@ -266,11 +292,12 @@ class BasePlot:
         plot_obj.modifiers[0].operation = 'INTERSECT'
         bpy.ops.object.modifier_apply(modifier=plot_obj.modifiers[0].name)
 
+        # Remove all crop faces
         bm = bmesh.new()
         bm.from_mesh(plot_obj.data)
         bm.faces.ensure_lookup_table()
-        faces = [f for i, f in enumerate(bm.faces) if i%2]
-        bmesh.ops.delete(bm, geom=faces, context='FACES_ONLY')
+        crop_faces = [f for i, f in enumerate(bm.faces) if self._is_crop_face(f.verts)]
+        bmesh.ops.delete(bm, geom=crop_faces, context='FACES_ONLY')
         bm.to_mesh(plot_obj.data)
 
     def apply_colormap(self, colormap):
