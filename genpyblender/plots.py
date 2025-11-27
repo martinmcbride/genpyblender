@@ -255,6 +255,19 @@ class BasePlot:
     def crop_plot(self, plot_obj):
         bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 0))
         cube = bpy.context.selected_objects[0]
+        cube.color = [1, 0, 0, 1]
+        # print(cube)
+        #
+        # mat = cube.data.materials[0]
+        # print(mat)
+        #
+        # if mat.use_nodes:
+        #     mat.blend_method = 'CLIP'
+        #     shader = mat.node_tree.nodes['Principled BSDF']
+        #
+        #     for node in mat.node_tree.nodes:
+        #         mat.node_tree.links.new(shader.inputs['Alpha'], node.outputs['Alpha'])
+        #         node.inputs['Alpha'].defaul_value = 0.5
 
         bpy.ops.object.select_all(action='DESELECT')
         cube.hide_render = True
