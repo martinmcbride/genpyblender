@@ -408,6 +408,8 @@ class Plot3dZofXY(BasePlot):
                 x, y1, z1 = self.axes.convert_points_graph_to_blender(xg, y1g, z1g)
 
                 self.axes.cylinder_between(x, y0, z0, x, y1, z1, self.line_radius, self.line_color)
+                if self.clip_to_axes:
+                    self.crop_plot(bpy.context.active_object)
 
         for y in self.axes.div_positions[1]:
             for i in range(self.precision):
@@ -423,6 +425,8 @@ class Plot3dZofXY(BasePlot):
                 x1, y, z1 = self.axes.convert_points_graph_to_blender(x1g, yg, z1g)
 
                 self.axes.cylinder_between(x0, y, z0, x1, y, z1, self.line_radius, self.line_color)
+                if self.clip_to_axes:
+                    self.crop_plot(bpy.context.active_object)
 
     def plot(self):
         bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.precision, y_subdivisions=self.precision,
@@ -496,6 +500,8 @@ class Plot3dXYZofUV(BasePlot):
                 x, y1, z1 = self.axes.convert_points_graph_to_blender(xg, y1g, z1g)
 
                 self.axes.cylinder_between(x, y0, z0, x, y1, z1, self.line_radius, self.line_color)
+                if self.clip_to_axes:
+                    self.crop_plot(bpy.context.active_object)
 
         for y in self.axes.div_positions[1]:
             for i in range(self.precision):
@@ -511,6 +517,8 @@ class Plot3dXYZofUV(BasePlot):
                 x1, y, z1 = self.axes.convert_points_graph_to_blender(x1g, yg, z1g)
 
                 self.axes.cylinder_between(x0, y, z0, x1, y, z1, self.line_radius, self.line_color)
+                if self.clip_to_axes:
+                    self.crop_plot(bpy.context.active_object)
 
     def plot(self):
         bpy.ops.mesh.primitive_grid_add(x_subdivisions=self.precision, y_subdivisions=self.precision,
@@ -590,6 +598,5 @@ class Plot2dXYZofT(BasePlot):
             x1g, y1g, z1g = self.axes.convert_points_graph_to_blender(x1, y1, z1)
 
             self.axes.cylinder_between(x0g, y0g, z0g, x1g, y1g, z1g, self.line_radius, self.line_color)
-
-        if self.clip_to_axes:
-            pass
+            if self.clip_to_axes:
+                self.crop_plot(bpy.context.active_object)
