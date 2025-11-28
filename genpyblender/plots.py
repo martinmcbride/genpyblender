@@ -243,7 +243,7 @@ class BasePlot:
         self.colormap = None
         self.precision = 20
         self.show_lines = False
-        self.clip_to_axes = True
+        self.clip_to_axes = False
         self.line_color = (0, 0, 0.5, 0)
         self.line_radius = 0.01
 
@@ -257,8 +257,8 @@ class BasePlot:
         self.show_lines = True
         return self
 
-    def noclip(self):
-        self.clip_to_axes = False
+    def clip(self):
+        self.clip_to_axes = True
         return self
 
     def _is_crop_face(self, face_verts):
