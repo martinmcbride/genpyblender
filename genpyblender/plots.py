@@ -258,6 +258,7 @@ class BasePlot:
 
     def noclip(self):
         self.clip_to_axes = False
+        return self
 
     def _is_crop_face(self, face_verts):
         """

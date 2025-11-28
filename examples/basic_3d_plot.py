@@ -4,7 +4,7 @@ import math
 import os
 
 
-working_dir_path = os.path.abspath("/nas/martin/7-software-projects/genpyblender/")
+working_dir_path = os.path.abspath("/genpyblender/")
 sys.path.append(working_dir_path)
 
 from mathutils import Vector
@@ -15,11 +15,12 @@ def draw(pixel_width, pixel_height, frame_no, frame_count):
 
     camera_object = camera.create_plot_camera()
 
-    axes = plots.Axes().of_start((-1, -1, 0)).of_extent((2, 2, 2)).with_divisions((0.5, 0.5, 0.5))
+    axes = plots.Axes().of_start((-1, -1, 0)).of_extent((2, 2, 1)).with_divisions((.2, .2, .2))
     axes.draw()
-#    plot = plots.Plot3dZofXY(axes).of_function(lambda x, y :2 - (x*x +y*y)).fill(colormap.ViridianMap(0, 1)).stroke([1, 0, 0, 1])
-#    plot = plots.Plot3dXYZofUV(axes).of_function(lambda u, v :v*math.cos(u), lambda u, v :v*math.sin(u), lambda u, v :u/3, u_extent=(0, 2*math.pi), v_extent=(0.5, 1.5)).fill(colormap.ViridianMap(0, 1))
-    plot = plots.Plot2dXYZofT(axes).of_function(lambda t :math.cos(t), lambda t :math.sin(t), lambda t :t/10, t_extent=(0, 4*math.pi))
+    grid = [i for i in range(20)]
+    plot = plots.Plot3dZofXY(axes).of_function(lambda x, y :math.exp(y)*math.cos(x), precision=20).fill(colormap.ViridianMap(0, 1)).stroke([0, 0.2, 0, 1])
+    plot = plots.Plot3dXYZofUV(axes).of_function(lambda u, v :u, lambda u, v:v, lambda u, v :math.atan2(u, v), u_extent=(0, 2*math.pi), v_extent=(0, 1)).fill(colormap.ViridianMap(0, 1))
+    #plot = plots.Plot2dXYZofT(axes).of_function(lambda t :.75, lambda t :0.5, lambda t :t, t_extent=(-1, 2)).noclip()
     plot.plot()
 
     ## Lights
