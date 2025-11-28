@@ -1,0 +1,1 @@
+blender --background -noaudio --python basic_xyz_plot.py --render-frame 1
