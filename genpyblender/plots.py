@@ -242,6 +242,7 @@ class BasePlot:
         self.colormap = None
         self.precision = 20
         self.show_lines = False
+        self.clip_to_axes = True
         self.line_color = (0, 0, 0.5, 0)
         self.line_radius = 0.01
 
@@ -254,6 +255,9 @@ class BasePlot:
         self.line_radius = line_width
         self.show_lines = True
         return self
+
+    def noclip(self):
+        self.clip_to_axes = False
 
     def _is_crop_face(self, face_verts):
         """
@@ -443,7 +447,8 @@ class Plot3dZofXY(BasePlot):
         if self.show_lines:
             self.draw_lines()
 
-        self.crop_plot(obj)
+        if self.clip_to_axes:
+            self.crop_plot(obj)
 
 
 class Plot3dXYZofUV(BasePlot):
@@ -534,7 +539,8 @@ class Plot3dXYZofUV(BasePlot):
         if self.show_lines:
             self.draw_lines()
 
-        self.crop_plot(obj)
+        if self.clip_to_axes:
+            self.crop_plot(obj)
         
         
 class Plot2dXYZofT(BasePlot):
@@ -585,4 +591,5 @@ class Plot2dXYZofT(BasePlot):
 
             self.axes.cylinder_between(x0g, y0g, z0g, x1g, y1g, z1g, self.line_radius, self.line_color)
 
-        #self.crop_plot(obj)
+        if self.clip_to_axes:
+            pass
