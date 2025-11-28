@@ -567,36 +567,6 @@ class Plot2dXYZofT(BasePlot):
         self.t_extent = t_extent
         return self
 
-    def draw_lines(self):
-        for x in self.axes.div_positions[0]:
-            for i in range(self.precision):
-                y0 = 2 * i / self.precision - 1
-                y1 = 2 * (i + 1) / self.precision - 1
-
-                xg, y0g, _ = self.axes.convert_points_blender_to_graph(x, y0, 0)
-                z0g = self.function_x(xg, y0g)
-                x, y0, z0 = self.axes.convert_points_graph_to_blender(xg, y0g, z0g)
-
-                xg, y1g, _ = self.axes.convert_points_blender_to_graph(x, y1, 0)
-                z1g = self.function_y(xg, y1g)
-                x, y1, z1 = self.axes.convert_points_graph_to_blender(xg, y1g, z1g)
-
-                self.axes.cylinder_between(x, y0, z0, x, y1, z1, self.line_radius, self.line_color)
-
-        for y in self.axes.div_positions[1]:
-            for i in range(self.precision):
-                x0 = 2 * i / self.precision - 1
-                x1 = 2 * (i + 1) / self.precision - 1
-
-                x0g, yg, _ = self.axes.convert_points_blender_to_graph(x0, y, 0)
-                z0g = self.function_x(x0g, yg)
-                x0, y, z0 = self.axes.convert_points_graph_to_blender(x0g, yg, z0g)
-
-                x1g, yg, _ = self.axes.convert_points_blender_to_graph(x1, y, 0)
-                z1g = self.function_y(x1g, yg)
-                x1, y, z1 = self.axes.convert_points_graph_to_blender(x1g, yg, z1g)
-
-                self.axes.cylinder_between(x0, y, z0, x1, y, z1, self.line_radius, self.line_color)
 
     def plot(self):
         delta = (self.t_extent[1] - self.t_extent[0])/self.precision 
@@ -613,6 +583,6 @@ class Plot2dXYZofT(BasePlot):
             z1 = self.function_z(t + delta)
             x1g, y1g, z1g = self.axes.convert_points_graph_to_blender(x1, y1, z1)
 
-            self.axes.cylinder_between(x0, y0, z0, x1, y1, z1, self.line_radius, self.line_color)
+            self.axes.cylinder_between(x0g, y0g, z0g, x1g, y1g, z1g, self.line_radius, self.line_color)
 
         #self.crop_plot(obj)
