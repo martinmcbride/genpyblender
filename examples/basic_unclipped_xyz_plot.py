@@ -18,9 +18,9 @@ def draw(pixel_width, pixel_height, frame_no, frame_count):
 
     axes = plots.Axes().of_start((-1, -1, -1)).of_extent((2, 2, 2)).with_divisions((.5, .5, .5))
     axes.draw()
-    plot = plots.Plot3dZofXY(axes).of_function(lambda x, y :1.2*math.cos(6*x)*math.sin(6*y), precision=100).fill(colormap.ViridianMap(0, 1)).stroke([0, 0, 0.2, 1]).clip()
+    plot = plots.Plot3dZofXY(axes).of_function(lambda x, y :1.2*math.cos(6*x)*math.sin(6*y), precision=100).fill(colormap.ViridianMap(0, 1)).stroke([0, 0, 0.2, 1])
     plot.plot()
 
     return camera_object
 
-make_image.make_blender_image("basic_clipped_xyz_plot", draw, 500, 500)
+make_image.make_blender_image("basic_unclipped_xyz_plot", draw, 500, 500)
