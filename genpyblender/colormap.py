@@ -1,4 +1,7 @@
-import itertools
+# Author:  Martin McBride
+# Created: 2025-11-02
+# Copyright (c) 2025, Martin McBride
+# License: GNU GPL V 3
 
 def ViridianMap(minval, maxval, steps=1000):
 
