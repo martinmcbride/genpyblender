@@ -1,0 +1,1 @@
+blender --background -noaudio --python clipped_t_plot.py --render-frame 1
