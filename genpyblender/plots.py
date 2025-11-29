@@ -558,11 +558,17 @@ class Plot2dXYZofT(BasePlot):
     def __init__(self, axes):
         super().__init__(axes)
         self.show_lines = True
+        self.line_radius = 0.02
+
         self.precision = 100
         self.function_x = lambda t: t
         self.function_y = lambda t: t
         self.function_y = lambda t: t
         self.t_extent = (0, 1)
+
+    def stroke(self, color, line_width=0.02):
+        BasePlot.stroke(self, color, line_width)
+        return self
 
     def of_function(self, function_x, function_y, function_z, t_extent = (0, 1), precision=100):
         '''
