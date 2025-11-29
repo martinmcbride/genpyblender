@@ -465,7 +465,7 @@ class Plot3dXYZofUV(BasePlot):
         self.function_y = lambda u, v: v
         self.function_y = lambda u, v: 0
         self.u_extent = (0, 1)
-        self.x_extent = (0, 1)
+        self.v_extent = (0, 1)
 
     def of_function(self, function_x, function_y, function_z, u_extent = (0, 1), v_extent = (0, 1), precision=20):
         '''
@@ -534,7 +534,8 @@ class Plot3dXYZofUV(BasePlot):
         bm = bmesh.from_edit_mesh(mesh)
 
         for verts in bm.verts:
-            vert_u, vert_v, _ = self.axes.convert_points_blender_to_graph(verts.co.x, verts.co.y, 0)
+            vert_u = (verts.co.x + 1)/2
+            vert_v = (verts.co.y + 1)/2
             u = self.u_extent[0] + vert_u*(self.u_extent[1] - self.u_extent[0])
             v = self.v_extent[0] + vert_v*(self.v_extent[1] - self.v_extent[0])
             x = self.function_x(u, v)
