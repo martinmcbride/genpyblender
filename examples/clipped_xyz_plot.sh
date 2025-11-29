@@ -1,0 +1,1 @@
+blender --background -noaudio --python clipped_xyz_plot.py --render-frame 1
