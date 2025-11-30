@@ -168,6 +168,8 @@ class Axes():
         )
 
         phi = math.atan2(dy, dx)
+        if abs(dist) < 0.0001:
+            dist = 0.0001
         theta = math.acos(dz / dist)
 
         bpy.context.object.rotation_euler[1] = theta
@@ -378,6 +380,7 @@ class Plot3dZofXY(BasePlot):
     def __init__(self, axes):
         super().__init__(axes)
         self.function = lambda x, y: 0
+        self.line_divisions = None
 
     def of_function(self, function, precision=20, extent=()):
         '''
@@ -466,6 +469,16 @@ class Plot3dXYZofUV(BasePlot):
         self.function_y = lambda u, v: 0
         self.u_extent = (0, 1)
         self.v_extent = (0, 1)
+        self.u_divs = 10
+        self.v_divs = 10
+
+    def stroke(self, color, line_width=0.01, u_divs=10, v_divs=10):
+        self.line_color = color
+        self.line_radius = line_width
+        self.show_lines = True
+        self.u_divs = u_divs
+        self.v_divs = v_divs
+        return self
 
     def of_function(self, function_x, function_y, function_z, u_extent = (0, 1), v_extent = (0, 1), precision=20):
         '''
@@ -488,37 +501,47 @@ class Plot3dXYZofUV(BasePlot):
         return self
 
     def draw_lines(self):
-        for x in self.axes.div_positions[0]:
+        lines = self.u_divs
+        step =  (self.u_extent[1] - self.u_extent[0])/(lines - 1)
+        steps = [self.u_extent[0] + i*step for i in range(lines)]
+        print(steps)
+        for u in steps:
             for i in range(self.precision):
-                y0 = 2 * i / self.precision - 1
-                y1 = 2 * (i + 1) / self.precision - 1
+                v0 = self.v_extent[0] + i * (self.v_extent[1] - self.v_extent[0])/self.precision
+                x0g = self.function_x(u, v0)
+                y0g = self.function_y(u, v0)
+                z0g = self.function_z(u, v0)
+                x0, y0, z0 = self.axes.convert_points_graph_to_blender(x0g, y0g, z0g)
 
-                xg, y0g, _ = self.axes.convert_points_blender_to_graph(x, y0, 0)
-                z0g = self.function_x(xg, y0g)
-                x, y0, z0 = self.axes.convert_points_graph_to_blender(xg, y0g, z0g)
+                v1 = self.v_extent[0] + (i +1) * (self.v_extent[1] - self.v_extent[0])/self.precision
+                x1g = self.function_x(u, v1)
+                y1g = self.function_y(u, v1)
+                z1g = self.function_z(u, v1)
+                x1, y1, z1 = self.axes.convert_points_graph_to_blender(x1g, y1g, z1g)
 
-                xg, y1g, _ = self.axes.convert_points_blender_to_graph(x, y1, 0)
-                z1g = self.function_y(xg, y1g)
-                x, y1, z1 = self.axes.convert_points_graph_to_blender(xg, y1g, z1g)
-
-                self.axes.cylinder_between(x, y0, z0, x, y1, z1, self.line_radius, self.line_color)
+                self.axes.cylinder_between(x0, y0, z0, x1, y1, z1, self.line_radius, self.line_color)
                 if self.clip_to_axes:
                     self.crop_plot(bpy.context.active_object)
 
-        for y in self.axes.div_positions[1]:
+        lines = self.v_divs
+        step =  (self.v_extent[1] - self.v_extent[0])/(lines - 1)
+        steps = [self.v_extent[0] + i*step for i in range(lines)]
+        print(steps)
+        for v in steps:
             for i in range(self.precision):
-                x0 = 2 * i / self.precision - 1
-                x1 = 2 * (i + 1) / self.precision - 1
+                u0 = self.u_extent[0] + i * (self.u_extent[1] - self.u_extent[0])/self.precision
+                x0g = self.function_x(u0, v)
+                y0g = self.function_y(u0, v)
+                z0g = self.function_z(u0, v)
+                x0, y0, z0 = self.axes.convert_points_graph_to_blender(x0g, y0g, z0g)
 
-                x0g, yg, _ = self.axes.convert_points_blender_to_graph(x0, y, 0)
-                z0g = self.function_x(x0g, yg)
-                x0, y, z0 = self.axes.convert_points_graph_to_blender(x0g, yg, z0g)
+                u1 = self.u_extent[0] + i * (self.u_extent[1] - self.u_extent[0])/self.precision
+                x1g = self.function_x(u1, v)
+                y1g = self.function_y(u1, v)
+                z1g = self.function_z(u1, v)
+                x1, y1, z1 = self.axes.convert_points_graph_to_blender(x1g, y1g, z1g)
 
-                x1g, yg, _ = self.axes.convert_points_blender_to_graph(x1, y, 0)
-                z1g = self.function_y(x1g, yg)
-                x1, y, z1 = self.axes.convert_points_graph_to_blender(x1g, yg, z1g)
-
-                self.axes.cylinder_between(x0, y, z0, x1, y, z1, self.line_radius, self.line_color)
+                self.axes.cylinder_between(x0, y0, z0, x1, y1, z1, self.line_radius, self.line_color)
                 if self.clip_to_axes:
                     self.crop_plot(bpy.context.active_object)
 
