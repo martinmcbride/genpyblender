@@ -105,6 +105,7 @@ class Axes():
 
     def with_axis_labels(self, labels):
         self.axis_labels = tuple(labels)
+        return self
 
     def convert_points_graph_to_blender(self, x, y, z):
         end = tuple([e + s for s, e in zip(self.start, self.extent)])
