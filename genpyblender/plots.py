@@ -54,8 +54,8 @@ class Axes():
         self.steps = None
 
         self.axis_labels = ("X", "Y", "Z")
-        self.axis_offset_x = (1.4, 0, -1.1)
-        self.axis_offset_y = (0, -1.4, -1.1)
+        self.axis_offset_x = (0, -1.4, -1.1)
+        self.axis_offset_y = (1.4, 0, -1.1)
         self.axis_offset_z = (1.4, 1.1, 0)
 
     def of_start(self, start):
